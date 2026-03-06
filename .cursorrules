@@ -1,0 +1,249 @@
+# Role & Persona
+You are an expert Svelte 5 and FieldTwin Integration Developer. You are building a frontend integration that runs as an iframe inside the FutureOn FieldTwin platform.
+
+# Critical Technical Constraints
+1. **Framework:** Svelte 5 (Runes API).
+2. **Styling:** Bootstrap 5.
+3. **Communication:** `window.postMessage` (Host <-> Iframe).
+4. **API Client:** Axios (via `IntegrationService.js`).
+
+# Svelte 5 & Runes Mandate
+You must use Svelte 5 Runes syntax. Do not use legacy Svelte 3/4 syntax.
+
+**State:**
+```javascript
+let count = $state(0); // ✅ GOOD
+// NOT: let count;
+```
+
+**Props:**
+```javascript
+const { firstVar = null, secondVar = null, onCallback = () => {} } = $props(); // ✅ GOOD
+// NOT: export let firstVar;
+```
+
+**Derived:**
+```javascript
+let doubled = $derived(count * 2); // ✅ GOOD
+// NOT: $: doubled = count * 2;
+```
+
+**Effects:**
+```javascript
+$effect(() => {
+  console.log(`Count changed to: ${count}`);
+});
+```
+
+**Event Handling:**
+Use **Direct Attribute Handlers** (`onclick`, `onchange`, `onsubmit`).
+```javascript
+// ❌ BAD: <button on:click={handleClick}>
+// ✅ GOOD:
+function handleClick() {
+  count++;
+}
+<button onclick={handleClick}>Increment</button>
+<input onchange={(e) => console.log(e.target.value)} />
+```
+
+# Project Structure & File Rules
+- **Do Not Edit:** `.github/`, `src/main.js`, `package.json`.
+- **User Instructions:** Check `prd/` directory for user-written Markdown PRDs.
+- **Components:** Place UI components in `src/components/`.
+- **API Logic:** All FieldTwin API calls must go through `src/actions/IntegrationService.js`.
+- **Styles:** Global styles in `src/app.css`.
+
+# FieldTwin Integration Protocol
+The app communicates with the parent window via `window.postMessage`.
+
+## 1. Incoming Events (Host -> Integration)
+Listen for these events. The `loaded` event is critical for initialization.
+
+**`loaded` Payload:**
+```json
+{
+  "event": "loaded",
+  "token": "JWT_TOKEN",
+  "subProject": "SUBPROJECT_ID",
+  "backendUrl": "https://api.fieldtwin.com",
+  "customTabId": "UNIQUE_ID",
+  "APIServerIsReady": true,
+  "selection": [{ "type": "stagedAsset", "id": "..." }]
+}
+```
+
+**`select` Payload (User selects 3D items):**
+```json
+{
+  "event": "select",
+  "data": [{ "type": "stagedAsset", "id": "UUID", "name": "Asset Name" }],
+  "cursorPosition": { "x": 0, "y": 0, "z": 0 }
+}
+```
+
+**`operationSearch` Payload (User presses Enter in global search):**
+```json
+{
+  "event": "operationSearch",
+  "query": "search-string"
+}
+```
+
+## 2. Outgoing Requests (Integration -> Host)
+Send these to `window.parent.postMessage(payload, '*')`.
+
+**Search Results (`operationSearchResults`):**
+```javascript
+{
+  event: 'operationSearchResults',
+  data: {
+    results: [{
+      category: 'Category Name', // Foldable in the UI
+      id: 'item-1', // Required for sub-item state persistence
+      html: '<b>Parent Item</b>',
+      action: 'myAction', // Optional: event sent back on click
+      args: { id: 1 }, // Optional: data passed to action
+      subItems: [ // Optional: nested items
+        {
+          id: 'sub-1',
+          html: 'Sub Asset A',
+          icon: 'cube', // 'file', 'cube', or 'circle' (default)
+          action: 'focusSub',
+          args: { id: 'a' }
+        }
+      ]
+    }]
+  }
+}
+```
+
+**CRUD Resources (`createResources`):**
+```javascript
+{
+  event: 'createResources',
+  data: [{
+    resourceType: 'stagedAsset',
+    attributes: {
+      name: 'New Asset',
+      x: 665000,
+      y: 400000,
+      z: 0,
+      stagedAssetSymbolId: '...'
+    },
+    volatile: false, // Set true if it shouldn't save to DB
+    draggable: true,
+    projectTreeViewCustomPath: ['My Integration', 'Assets']
+  }]
+}
+```
+
+**Update Resources (`updateResources`):**
+```javascript
+{
+  event: 'updateResources',
+  data: [{
+    resourceType: 'stagedAsset',
+    resourceId: 'UUID-123',
+    attributes: {
+      name: 'Updated Name',
+      z: 10
+    }
+  }]
+}
+```
+
+**Other Common Events:**
+- `zoomOn`: `{ event: 'zoomOn', data: { resourceIds: ['ID'], resourceTypes: ['stagedAsset'] } }`
+- `zoomAt`: `{ event: 'zoomAt', data: { x: 665000, y: 400000, z: 100 } }`
+- `toast`: `{ event: 'toast', data: { type: 'success', message: 'Saved' } }`
+- `visualFilteringUpdate`: Send filter buttons to the host UI
+- `selectByTag`: `{ event: 'selectByTag', tags: ['tag1', 'tag2'] }`
+
+# FieldTwin REST API Reference
+
+**Base URL:** Use `backendUrl` from `loaded` event or `VITE_FIELDAP_API_BASE_URL`.
+**Auth:** Header `Authorization: Bearer <token>`
+
+## Example API Request
+```javascript
+// Using axios with JWT authentication
+const response = await axios.get(
+  `https://api.fieldtwin.com/API/v1.10/${projectId}/subProject/${subProjectId}/stagedAssets`,
+  {
+    headers: {
+      'Authorization': `Bearer ${jwtToken}`,
+    }
+  }
+);
+
+// Filter by metadata name
+const asset = response.data.find(item => 
+  item.metaData.some(meta => meta.name === 'Asset Name')
+);
+```
+
+## Object Schemas & Endpoints
+
+Refer to these schemas when writing `IntegrationService.js`.
+
+### StagedAssets
+**Endpoint:** `/API/v1.10/:projectId/subProject/:subProjectId/stagedAssets`
+**Key Properties:**
+- `id`: UUID
+- `name`: String
+- `metaData`: Array `[{ name: "Vendor", value: "Aker", type: "string" }]`
+- `initialState`: `{ x: 0, y: 0, z: 0, rotation: 0 }`
+- `asset`: Definition object containing `model3dUrl`, `sockets2d`, etc.
+
+### Wells
+**Endpoint:** `/API/v1.10/:projectId/subProject/:subProjectId/wells`
+**Key Properties:**
+- `wellBores`: Array of paths `{ path: [x,y,z,depth,incl,az] }`
+- `x`, `y`, `z`: Wellhead location.
+
+### Connections (Pipelines)
+**Endpoint:** `/API/v1.10/:projectId/subProject/:subProjectId/connections`
+**Key Properties:**
+- `fromCoordinate`, `toCoordinate`: `{x,y,z}`
+- `intermediaryPoints`: Array of points.
+- `params`: `{ width: 0.5, color: "#FF0000" }`
+
+# Coding Standards
+
+## JSDoc Documentation
+Mandatory for all functions/classes. Format:
+```javascript
+/**
+ * Brief description of the function/class/method
+ *
+ * @param {Type} paramName - Description of the parameter
+ * @param {Type} [optionalParam] - Description of the optional parameter
+ * @returns {ReturnType} Description of the return value
+ * @throws {ErrorType} Description of when this error is thrown
+ * @example
+ * // Example usage of the function/class/method
+ * const result = myFunction('example');
+ */
+```
+
+## Code Style
+- 2 spaces indentation
+- Semicolons required
+- Single quotes for strings
+- Trailing commas in multiline objects
+- camelCase for variables/functions
+- PascalCase for components/classes
+- kebab-case for file names
+
+## Error Handling
+- Wrap all API calls in `try/catch`
+- Log errors to console but sanitize tokens
+- Always check `APIServerIsReady` from `loaded` event before calling API
+- Use async/await (prefer over `.then()`)
+
+## IntegrationService Guidelines
+- Handles project/account queries and calculations
+- Queries object fields (e.g., asset category)
+- Performs calculations (e.g., asset counts)
+- All FieldTwin API interactions must go through this service
