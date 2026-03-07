@@ -6,19 +6,21 @@
     Grid3x3Gap, 
     PlusCircle, 
     Download,
+    InfoCircle,
   } from 'svelte-bootstrap-icons';
   import HazidService from '../actions/hazid-service';
   import FindingsRegister from './findings-register.svelte';
   import ActionRegister from './action-register.svelte';
   import RiskMatrix from './risk-matrix.svelte';
   import FindingDetail from './finding-detail.svelte';
+  import ReviewDetails from './review-details.svelte';
 
   /**
    * @typedef {Object} ReviewWorkspaceProps
    * @property {string} reviewId - UUID of the active review
    * @property {string} projectId - FieldTwin project UUID
    * @property {Array} currentSelection - List of currently selected objects from host
-   * @property {string} activeTab - Currently active tab (findings|actions|matrix)
+   * @property {string} activeTab - Currently active tab (findings|actions|matrix|details)
    * @property {string|null} selectedFindingId - ID of finding currently being viewed
    * @property {boolean} showCreateFinding - Whether the create finding modal is visible
    * @property {function(string): void} onTabChange - Callback for tab switching
@@ -62,6 +64,16 @@
     console.log('Workspace: Refreshing findings');
     findings = HazidService.getFindings(reviewId);
     onCloseDetail();
+  }
+
+  /**
+   * Triggers a refresh of the review data.
+   *
+   * @returns {void}
+   */
+  function refreshReview() {
+    console.log('Workspace: Refreshing review');
+    review = HazidService.getReview(reviewId);
   }
 
   /**
@@ -124,6 +136,14 @@
         <Grid3x3Gap class="me-2" /> Risk Matrix
       </button>
     </li>
+    <li class="nav-item">
+      <button 
+        class="nav-link {activeTab === 'details' ? 'active' : ''}" 
+        onclick={() => onTabChange('details')}
+      >
+        <InfoCircle class="me-2" /> Review Details
+      </button>
+    </li>
   </ul>
 
   <!-- Workspace Content -->
@@ -133,7 +153,9 @@
     {:else if activeTab === 'actions'}
       <ActionRegister {reviewId} />
     {:else if activeTab === 'matrix'}
-      <RiskMatrix {findings} />
+      <RiskMatrix {findings} onOpenFinding={onOpenFinding} />
+    {:else if activeTab === 'details'}
+      <ReviewDetails {reviewId} onUpdate={refreshReview} />
     {/if}
   </div>
 </div>

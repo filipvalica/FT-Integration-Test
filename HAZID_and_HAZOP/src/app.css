@@ -1,5 +1,5 @@
 /* FieldTwin Integration Styles for HAZID/HAZOP */
-/* These styles use FieldTwin CSS custom properties with Bootstrap fallbacks */
+/* Synchronized with Asset_List_and_Diagnostic for color consistency */
 
 :root {
   --ftw-teal-accent: #459685;
@@ -30,7 +30,7 @@ html, body {
   background-color: var(--ftw-card-background-color, #2b2b2b) !important;
   color: var(--ftw-card-text, #e0e0e0) !important;
   border: 1px solid var(--ftw-border-color-accent-one, #444) !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 2px 4px var(--ftw-card-box-shadow, rgba(0, 0, 0, 0.3)) !important;
 }
 
 .card-header {
@@ -70,16 +70,19 @@ html, body {
   border-color: var(--ftw-border-color-accent-one, #444);
 }
 
-/* Banded/Striped rows for readability */
-.table-striped > tbody > tr:nth-of-type(odd) > td {
+/* Striped rows - alternate with slightly different dark grey shade */
+.table-striped > tbody > tr:nth-of-type(odd) > td,
+.table-striped > tbody > tr:nth-of-type(odd) > th {
   background-color: var(--ftw-background-accent-one, #1a1a1a);
 }
 
-.table-striped > tbody > tr:nth-of-type(even) > td {
-  background-color: var(--ftw-background-accent-two, #222);
+.table-striped > tbody > tr:nth-of-type(even) > td,
+.table-striped > tbody > tr:nth-of-type(even) > th {
+  background-color: var(--ftw-background-accent-two, #333333);
 }
 
-.table-hover > tbody > tr:hover > td {
+.table-hover > tbody > tr:hover > td,
+.table-hover > tbody > tr:hover > th {
   background-color: var(--ftw-background-accent-three, #3d3d3d) !important;
   color: #fff;
 }
@@ -95,6 +98,12 @@ html, body {
   border-color: var(--ftw-teal-accent) !important;
   box-shadow: 0 0 0 0.25rem rgba(69, 150, 133, 0.25) !important;
   outline: none;
+}
+
+/* Improve placeholder readability */
+.form-control::placeholder {
+  color: var(--ftw-text-secondary, #b0b0b0) !important;
+  opacity: 0.8;
 }
 
 /* Buttons */
@@ -122,6 +131,20 @@ html, body {
 /* Headings */
 h1, h2, h3, h4, h5, h6 {
   color: var(--ftw-teal-accent);
+}
+
+/* Success colors should use teal */
+.text-success {
+  color: var(--ftw-teal-accent) !important;
+}
+
+.badge.bg-success {
+  background-color: var(--ftw-teal-accent) !important;
+}
+
+/* Force override any green backgrounds */
+* {
+  --ftw-success-color: #459685 !important;
 }
 
 /* Custom UI Elements */

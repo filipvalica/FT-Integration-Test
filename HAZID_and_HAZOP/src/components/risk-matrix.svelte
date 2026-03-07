@@ -2,10 +2,11 @@
   /**
    * @typedef {Object} RiskMatrixProps
    * @property {Array<Object>} findings - List of findings to plot on the matrix
+   * @property {function(string): void} onOpenFinding - Callback to open a finding detail
    */
 
   /** @type {RiskMatrixProps} Component props */
-  const { findings = [] } = $props();
+  const { findings = [], onOpenFinding } = $props();
 
   const severities = ['5 - Critical', '4 - High', '3 - Medium', '2 - Low', '1 - Negligible'];
   const likelihoods = ['1 - Improbable', '2 - Remote', '3 - Occasional', '4 - Probable', '5 - Frequent'];
@@ -55,23 +56,36 @@
         {@const sVal = 5 - sIdx}
         {@const lVal = lIdx + 1}
         <div class="cell matrix-cell {getCellColor(sVal, lVal)}">
-          {#if cellFindings.length > 0}
-            <div class="finding-count shadow-sm">{cellFindings.length}</div>
-          {/if}
+          <div class="dot-container">
+            {#each cellFindings as finding (finding.id)}
+              <button 
+                type="button"
+                class="finding-dot shadow-sm" 
+                title={finding.title} 
+                onclick={() => onOpenFinding(finding.id)}
+                aria-label="View finding: {finding.title}"
+              ></button>
+            {/each}
+          </div>
         </div>
       {/each}
     {/each}
   </div>
 
-  <div class="mt-4 d-flex justify-content-center gap-4">
-    <div class="d-flex align-items-center small">
-      <div class="legend-box risk-high me-2"></div> High Risk
+  <div class="mt-4 d-flex flex-column align-items-center">
+    <div class="d-flex justify-content-center gap-4 mb-2">
+      <div class="d-flex align-items-center small">
+        <div class="legend-box risk-high me-2"></div> High Risk
+      </div>
+      <div class="d-flex align-items-center small">
+        <div class="legend-box risk-medium me-2"></div> Medium Risk
+      </div>
+      <div class="d-flex align-items-center small">
+        <div class="legend-box risk-low me-2"></div> Low Risk
+      </div>
     </div>
-    <div class="d-flex align-items-center small">
-      <div class="legend-box risk-medium me-2"></div> Medium Risk
-    </div>
-    <div class="d-flex align-items-center small">
-      <div class="legend-box risk-low me-2"></div> Low Risk
+    <div class="text-secondary-ft smaller italic">
+      Hover over dots to see finding titles. Click dots to open details.
     </div>
   </div>
 </div>
@@ -119,19 +133,34 @@
   }
   .risk-high { background-color: #dc3545 !important; }
   .risk-medium { background-color: #ffc107 !important; }
-  .risk-low { background-color: #198754 !important; }
+  .risk-low { background-color: var(--ftw-teal-accent, #459685) !important; }
   
-  .finding-count {
-    background-color: #fff;
-    color: #000;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+  .dot-container {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
     justify-content: center;
-    font-weight: bold;
-    font-size: 0.9rem;
+    align-items: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .finding-dot {
+    background-color: #fff;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.2);
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.1s, background-color 0.1s;
+  }
+  
+  .finding-dot:hover {
+    transform: scale(1.3);
+    background-color: var(--ftw-teal-accent, #459685);
+    border-color: #fff;
   }
   
   .y-axis-label {
@@ -159,4 +188,7 @@
     height: 16px;
     border-radius: 3px;
   }
+  .text-secondary-ft { color: var(--ftw-text-secondary, #aaa); }
+  .italic { font-style: italic; }
+  .smaller { font-size: 0.75rem; }
 </style>
