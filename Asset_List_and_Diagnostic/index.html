@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FieldTwin Integration</title>
+    <script>
+      // Store loaded event for App.svelte to access
+      window.loadedEvent = null;
+      
+      // Listen for 'loaded' event from FieldTwin
+      window.addEventListener('message', (event) => {
+        if (event.data?.event === 'loaded') {
+          window.loadedEvent = event.data;
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

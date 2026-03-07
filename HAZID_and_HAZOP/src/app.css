@@ -1,0 +1,157 @@
+/* FieldTwin Integration Styles for HAZID/HAZOP */
+/* These styles use FieldTwin CSS custom properties with Bootstrap fallbacks */
+
+:root {
+  --ftw-teal-accent: #459685;
+}
+
+/* Ensure scrolling works properly */
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  min-height: 100%;
+}
+
+/* Base App Theme */
+.app {
+  background-color: var(--ftw-background-accent-one, #1a1a1a) !important;
+  color: var(--ftw-text-accent-one, #e0e0e0) !important;
+  min-height: 100vh;
+}
+
+/* Card Styles */
+.card {
+  background-color: var(--ftw-card-background-color, #2b2b2b) !important;
+  color: var(--ftw-card-text, #e0e0e0) !important;
+  border: 1px solid var(--ftw-border-color-accent-one, #444) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.card-header {
+  background-color: #3D464D !important;
+  border-bottom: 1px solid var(--ftw-border-color-accent-one, #444) !important;
+  color: var(--ftw-text-title, #fff) !important;
+}
+
+.card-header h5, .card-header h6, .card-header .card-title, .card-header strong {
+  color: var(--ftw-teal-accent) !important;
+}
+
+.card-footer {
+  background-color: #3D464D !important;
+  border-top: 1px solid var(--ftw-border-color-accent-one, #444);
+  color: var(--ftw-text-secondary, #b0b0b0);
+}
+
+/* Table Styles */
+.table {
+  color: var(--ftw-text-accent-one, #e0e0e0);
+  background-color: var(--ftw-background-accent-one, #1a1a1a);
+}
+
+.table > thead > tr > th {
+  background-color: var(--ftw-background-accent-four, #1a1a1a);
+  color: var(--ftw-teal-accent);
+  border-color: var(--ftw-border-color-accent-one, #444);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.table > tbody > tr > td {
+  background-color: transparent;
+  color: var(--ftw-text-accent-one, #e0e0e0);
+  border-color: var(--ftw-border-color-accent-one, #444);
+}
+
+/* Banded/Striped rows for readability */
+.table-striped > tbody > tr:nth-of-type(odd) > td {
+  background-color: var(--ftw-background-accent-one, #1a1a1a);
+}
+
+.table-striped > tbody > tr:nth-of-type(even) > td {
+  background-color: var(--ftw-background-accent-two, #222);
+}
+
+.table-hover > tbody > tr:hover > td {
+  background-color: var(--ftw-background-accent-three, #3d3d3d) !important;
+  color: #fff;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+  background-color: var(--ftw-background-accent-three, #3d3d3d) !important;
+  border: 1px solid var(--ftw-border-color-accent-one, #444) !important;
+  color: var(--ftw-text-accent-one, #e0e0e0) !important;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--ftw-teal-accent) !important;
+  box-shadow: 0 0 0 0.25rem rgba(69, 150, 133, 0.25) !important;
+  outline: none;
+}
+
+/* Buttons */
+.btn-ft-primary {
+  background-color: var(--ftw-teal-accent);
+  color: #fff;
+  border: none;
+}
+
+.btn-ft-primary:hover:not(:disabled) {
+  background-color: #3a8274;
+  color: #fff;
+}
+
+.btn-outline-ft {
+  color: var(--ftw-text-accent-one, #e0e0e0);
+  border: 1px solid var(--ftw-border-color-accent-one, #444);
+}
+
+.btn-outline-ft:hover {
+  background-color: var(--ftw-background-accent-three, #3d3d3d);
+  color: #fff;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--ftw-teal-accent);
+}
+
+/* Custom UI Elements */
+.badge.bg-status {
+  background-color: var(--ftw-background-accent-four, #444);
+  color: var(--ftw-text-accent-one, #e0e0e0);
+  border: 1px solid var(--ftw-border-color-accent-one, #444);
+}
+
+.alert-ft-selection {
+  background-color: rgba(69, 150, 133, 0.1);
+  border: 1px solid rgba(69, 150, 133, 0.3);
+  color: var(--ftw-teal-accent);
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ftw-background-accent-one, #1a1a1a);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ftw-background-accent-four, #444);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ftw-teal-accent);
+}
